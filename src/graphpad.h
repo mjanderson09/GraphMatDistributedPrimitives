@@ -303,6 +303,12 @@ void Reduce(const SpVec<SpSegment<T> >& vec, T* res, void (*op_fp)(T, T, T*, voi
   Reduce_tile(vec, res, 0, vec.nsegments, op_fp, vsp);
 }
 
+template <template<typename> class SpSegment, typename T, typename VT>
+void MapReduce(const SpVec<SpSegment<VT> >& vec, T* res, void (*op_map)(VT, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp=NULL) {
+  MapReduce_tile(vec, res, 0, vec.nsegments, op_map, op_fp, vsp);
+}
+
+
 template <template<typename> class SpSegment, typename Ta, typename Tb>
 void Apply(const SpVec<SpSegment<Ta> > & v_in, SpVec<SpSegment<Tb> > * v_out, void (*add_fp)(Ta, Tb*, void*), void* vsp=NULL)
 {

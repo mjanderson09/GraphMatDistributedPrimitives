@@ -119,19 +119,29 @@ void reduce_dense_segment(T* value, int * bitvector, int nnz, T* result, bool* r
   {
     if(get_bitvector(i, bitvector))
     {
-      if(!(*res_set))
-      {
-        *result = value[i];
-	*res_set = true;
-      }
-      else
-      {
-        T temp_result = *result;
-	op_fp(temp_result, value[i], result, vsp);
-      }
+      T temp_result = *result;
+	  op_fp(temp_result, value[i], result, vsp);
     }
   }
 }
+
+
+template <typename VT, typename T>
+void mapreduce_dense_segment(VT* value, int * bitvector, int nnz, T* result, bool* res_set,
+                          void (*op_map)(VT, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
+
+  for(int i = 0 ; i < nnz ; i++)
+  {
+    if(get_bitvector(i, bitvector))
+    {
+      T temp_result = *result;
+      T temp_result2;
+      op_map(value[i], &temp_result2, vsp);
+	  op_fp(temp_result, temp_result2, result, vsp);
+    }
+  }
+}
+
 
 template <typename T>
 void reduce_dense(T* value, bool* bitvector, int m, int n, T* result,

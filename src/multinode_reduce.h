@@ -172,11 +172,38 @@ void Reduce_tile(const SpVec<SpSegment<T> >& vec, T* res, int start, int end,
     }
   }
 
-  if (!res_set) {
-    //
-    //*res = 0;
-    //std::cout << "Empty vector" << std::endl;
-    //exit(0);
+  // Reduce across nodes
+  T* all_res = new T[global_nrank];
+  all_res[global_myrank] = *res;
+  MPI_Status status;
+  for (int i = 1; i < global_nrank; i++) {
+    if (global_myrank == i) {
+      MPI_Send(all_res + i, sizeof(T), MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    }
+  }
+  for (int i = 1; i < global_nrank; i++) {
+    if (global_myrank == 0) {
+      MPI_Recv(all_res + i, sizeof(T), MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
+      T tmp_res = *res;
+      op_fp(tmp_res, all_res[i], res, vsp);
+    }
+  }
+
+  // Broadcast to all nodes
+  MPI_Bcast(res, sizeof(T), MPI_CHAR, 0, MPI_COMM_WORLD);
+}
+
+
+template <template<typename> class SpSegment, typename T, typename VT>
+void MapReduce_tile(const SpVec<SpSegment<VT> >& vec, T* res, int start, int end,
+                 void (*op_map)(VT, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
+  bool res_set = false;
+
+  for (int i = start; i < end; i++) {
+    if (vec.nodeIds[i] == global_myrank) {
+      DenseSegment<VT> segment = vec.segments[i];
+      mapreduce_segment(segment, res, &res_set, op_map, op_fp, vsp);
+    }
   }
 
   // Reduce across nodes
@@ -199,5 +226,7 @@ void Reduce_tile(const SpVec<SpSegment<T> >& vec, T* res, int start, int end,
   // Broadcast to all nodes
   MPI_Bcast(res, sizeof(T), MPI_CHAR, 0, MPI_COMM_WORLD);
 }
+
+
 
 #endif  // SRC_MULTINODE_REDUCE_H_
