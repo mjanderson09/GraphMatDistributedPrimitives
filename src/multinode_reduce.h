@@ -195,14 +195,13 @@ void Reduce_tile(const SpVec<SpSegment<T> >& vec, T* res, int start, int end,
 
 
 template <template<typename> class SpSegment, typename T, typename VT>
-void MapReduce_tile(const SpVec<SpSegment<VT> >& vec, T* res, int start, int end,
+void MapReduce_tile(SpVec<SpSegment<VT> > * vec, T* res, int start, int end,
                  void (*op_map)(VT*, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
   bool res_set = false;
 
   for (int i = start; i < end; i++) {
-    if (vec.nodeIds[i] == global_myrank) {
-      DenseSegment<VT> segment = vec.segments[i];
-      mapreduce_segment(segment, res, &res_set, op_map, op_fp, vsp);
+    if (vec->nodeIds[i] == global_myrank) {
+      mapreduce_segment(&(vec->segments[i]), res, &res_set, op_map, op_fp, vsp);
     }
   }
 
