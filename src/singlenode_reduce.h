@@ -128,7 +128,7 @@ void reduce_dense_segment(T* value, int * bitvector, int nnz, T* result, bool* r
 
 template <typename VT, typename T>
 void mapreduce_dense_segment(VT* value, int * bitvector, int nnz, T* result, bool* res_set,
-                          void (*op_map)(VT, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
+                          void (*op_map)(VT*, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
 
   for(int i = 0 ; i < nnz ; i++)
   {
@@ -136,7 +136,7 @@ void mapreduce_dense_segment(VT* value, int * bitvector, int nnz, T* result, boo
     {
       T temp_result = *result;
       T temp_result2;
-      op_map(value[i], &temp_result2, vsp);
+      op_map(value + i, &temp_result2, vsp);
 	  op_fp(temp_result, temp_result2, result, vsp);
     }
   }

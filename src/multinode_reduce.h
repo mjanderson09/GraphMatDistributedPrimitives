@@ -196,7 +196,7 @@ void Reduce_tile(const SpVec<SpSegment<T> >& vec, T* res, int start, int end,
 
 template <template<typename> class SpSegment, typename T, typename VT>
 void MapReduce_tile(const SpVec<SpSegment<VT> >& vec, T* res, int start, int end,
-                 void (*op_map)(VT, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
+                 void (*op_map)(VT*, T*, void*), void (*op_fp)(T, T, T*, void*), void* vsp) {
   bool res_set = false;
 
   for (int i = start; i < end; i++) {
